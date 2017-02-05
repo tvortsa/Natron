@@ -95,6 +95,7 @@ SOURCES += \
     AutoHideToolBar.cpp \
     BackdropGui.cpp \
     Button.cpp \
+    CachedFramesThread.cpp \
     ClickableLabel.cpp \
     ColoredFrame.cpp \
     ComboBox.cpp \
@@ -250,6 +251,7 @@ HEADERS += \
     AutoHideToolBar.h \
     BackdropGui.h \
     Button.h \
+    CachedFramesThread.h \
     ClickableLabel.h \
     ColoredFrame.h \
     ComboBox.h \
@@ -402,7 +404,7 @@ Resources/Fonts/Apache_License.txt \
 Resources/Images/Other/natron_picto_tools.svg \
 Resources/Images/Other/natron_picto_viewer.svg \
 Resources/Images/natronIcon.svg \
-Resources/Images/natronIcon256_osx.icns \
+Resources/Images/natronIcon.icns \
 Resources/Images/natronIcon256_windows.ico \
 Resources/Images/splashscreen.svg \
     Resources/Images/prevUserKey.png \

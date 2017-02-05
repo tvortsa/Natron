@@ -136,12 +136,21 @@ The last command above will take a while, since it builds from sources, and shou
 
     brew install ilmbase openexr freetype fontconfig ffmpeg opencolorio openimageio seexpr
 
+To install the openfx-arena set of plugin, you also need the following:
+
+    brew install librsvg poppler librevenge libcdr libzip
+    brew uninstall imagemagick
+    brew install imagemagick --with-hdri --with-librsvg --with-quantum-depth-32 --with-pango
+
+
 also set the correct value for the pkg-config path (you can also put
 this in your .bash_profile):
 
-    export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig:/usr/local/opt/cairo/lib/pkgconfig
+    export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig:/usr/local/opt/cairo/lib/pkgconfig:/usr/local/opt/icu4c/lib/pkgconfig
 
-### Installing a patched Qt to avoid stack overflows
+### Installing manually (outside of MacPorts or homebrew) a patched Qt to avoid stack overflows
+
+The following is not necessary if a patched Qt was already installed by the standard MacPorts or homebrew procedures above.
 
 See [QTBUG-49607](https://bugreports.qt.io/browse/QTBUG-49607), [homebrew issue #46307](https://github.com/Homebrew/homebrew/issues/46307), [MacPorts ticket 49793](http://trac.macports.org/ticket/49793).
 
@@ -250,11 +259,13 @@ version 3.9.1 is recommended) with OpenMP support on
 MacPorts (or homebrew for OS X 10.9 or later).  OpenMP brings speed improvements in the
 tracker and in CImg-based plugins.
 
+However, the unit tests don't pass yet with clang/libomp 3.9.1 on OS X 10.6, so be sure tu run the unit tests from https://github.com/MrKepzie/Natron-Tests to validate any clang/macOS combination.
+
 First, install clang 3.9. On OS X 10.9 and later, simply execute:
 
     sudo port -v install clang-3.9
 
-On older systems, follow the procedure described in "[https://trac.macports.org/wiki/LibcxxOnOlderSystems](Using libc++ on older system)".
+On older systems, follow the procedure described in "[https://trac.macports.org/wiki/LibcxxOnOlderSystems](Using libc++ on older system)". Note that we noticed clang 3.9.1 generates wrong code with `-Os` when compiling openexr, so it is safer to also change `default configure.optflags      {-Os}` to `default configure.optflags      {-O2}` in `/opt/local/libexec/macports/lib/port1.0/portconfigure.tcl` (type `sudo nano /opt/local/libexec/macports/lib/port1.0/portconfigure.tcl` to edit it).
 
 Then, configure using the following qmake command:
 

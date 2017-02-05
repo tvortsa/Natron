@@ -10,7 +10,7 @@ name                ffmpeg
 conflicts           ffmpeg-devel
 epoch               1
 version             3.2.2
-revision            1
+revision            3
 license             LGPL-2.1+
 categories          multimedia
 maintainers         devans jeremyhu openmaintainer
@@ -384,9 +384,11 @@ if {[variant_isset high10]} {
 variant gpl2 description {Enable GPL code, license will be GPL-2+} {
     configure.args-append   --enable-gpl \
                             --enable-postproc \
+                            --enable-libx265 \
                             --enable-libx264 \
                             --enable-libxvid
     depends_lib-append      port:XviD \
+                            port:x265 \
                             port:x264
 
     license                 GPL-2+

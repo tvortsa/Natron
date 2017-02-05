@@ -122,25 +122,78 @@ DocumentationManager::handler(QHttpRequest *req,
 
     // override static docs
     // plugin pages are generated only if they don't exist
-    QString staticPage, dynamicPage;
-    bool isPlugin = false;
+    QString staticPage, dynamicPage, pluginID;
     bool isStatic = false;
     if ( page.startsWith( QString::fromUtf8("/plugins/") ) ) {
-        isPlugin = true;
         isStatic = true;
+        pluginID = page;
+        pluginID.replace( QString::fromUtf8(".html"), QString() ).replace( QString::fromUtf8("/plugins/"), QString() );
         staticPage = page;
         dynamicPage = page;
-        dynamicPage.replace( QString::fromUtf8(".html"), QString::fromUtf8("") ).replace( QString::fromUtf8("/plugins/"), QString::fromUtf8("/_plugin.html?id=") );
+        dynamicPage.replace( QString::fromUtf8(".html"), QString() ).replace( QString::fromUtf8("/plugins/"), QString::fromUtf8("/_plugin.html?id=") );
     }
     if ( page.startsWith( QString::fromUtf8("/_plugin.html?id=") ) ) {
-        isPlugin = true;
         isStatic = false;
+        pluginID = page;
+        pluginID.replace( QString::fromUtf8("/_plugin.html?id="), QString() );
         staticPage = page;
         staticPage.replace( QString::fromUtf8("/_plugin.html?id="), QString::fromUtf8("/plugins/") );
         staticPage += QString::fromUtf8(".html");
         dynamicPage = page;
     }
-    if (isPlugin) {
+    if ( page == QString::fromUtf8("/_prefs.html") ) {
+        isStatic = true;
+        staticPage = page;
+        dynamicPage = QString::fromUtf8("/_prefsLive.html");
+    }
+    if ( page == QString::fromUtf8("/_prefsLive.html") ) {
+        isStatic = false;
+        staticPage = QString::fromUtf8("/_prefs.html");
+        dynamicPage = page;
+    }
+    // if this is one of the plugins that depend on the ocioConfigFile, the static page should not be used.
+    // to get the list of plugins:
+    // (cd Documentation/source/plugins; fgrep -l ocioConfigFile *.rst)
+    // as of Natron 2.2:
+    /*
+     fr.inria.built-in.Read.rst
+     fr.inria.built-in.Write.rst
+     fr.inria.openfx.OCIOColorSpace.rst
+     fr.inria.openfx.OCIODisplay.rst
+     fr.inria.openfx.OCIOLogConvert.rst
+     fr.inria.openfx.OCIOLookTransform.rst
+     fr.inria.openfx.OpenRaster.rst
+     fr.inria.openfx.ReadCDR.rst
+     fr.inria.openfx.ReadFFmpeg.rst
+     fr.inria.openfx.ReadKrita.rst
+     fr.inria.openfx.ReadMisc.rst
+     fr.inria.openfx.ReadOIIO.rst
+     fr.inria.openfx.ReadPDF.rst
+     fr.inria.openfx.ReadPFM.rst
+     fr.inria.openfx.ReadPNG.rst
+     fr.inria.openfx.WriteFFmpeg.rst
+     fr.inria.openfx.WriteOIIO.rst
+     fr.inria.openfx.WritePFM.rst
+     fr.inria.openfx.WritePNG.rst
+     net.fxarena.openfx.ReadPSD.rst
+     net.fxarena.openfx.ReadSVG.rst
+     */
+    {
+        const std::string id = pluginID.toStdString();
+        if (ReadNode::isBundledReader(id) ||
+            WriteNode::isBundledWriter(id) ||
+            pluginID.startsWith( QString::fromUtf8("fr.inria.openfx.OCIO") ) ||
+            //pluginID.startsWith( QString::fromUtf8("fr.inria.openfx.Read") ) ||
+            //pluginID.startsWith( QString::fromUtf8("fr.inria.openfx.Write") ) ||
+            //pluginID.startsWith( QString::fromUtf8("net.fxarena.openfx.Read") ) ||
+            //pluginID.startsWith( QString::fromUtf8("net.fxarena.openfx.Write") ) ||
+            id == PLUGINID_NATRON_READ ||
+            id == PLUGINID_NATRON_WRITE) {
+            // use the dynamic version, to get the right colorspace options
+            staticPage.clear();
+        }
+    }
+    if ( !staticPage.isEmpty() ) {
         QFileInfo staticFileInfo = docDir + staticPage;
         if ( ( isStatic && !staticFileInfo.exists() ) ||
              ( !isStatic && staticFileInfo.exists() ) ) {
@@ -276,7 +329,7 @@ DocumentationManager::handler(QHttpRequest *req,
                                                  "</html>");
             body = parser(notFound, docDir).toUtf8();
         }
-    } else if ( page == QString::fromUtf8("_prefs.html") ) {
+    } else if ( page == QString::fromUtf8("_prefsLive.html") ) {
         SettingsPtr settings = appPTR->getCurrentSettings();
         QString html = settings->makeHTMLDocumentation(true);
         html = parser(html, docDir);
@@ -548,21 +601,22 @@ DocumentationManager::parser(QString html,
                                        "</form>"
                                        "</div>")
                      .arg( tr("Search docs") ) );
-    menuHTML.append( QString::fromUtf8("<div id=\"mainMenu\">"
-                                       "<ul>") );
+    menuHTML.append( QString::fromUtf8("<div id=\"mainMenu\">") );
     if ( indexFile.exists() ) {
         if ( indexFile.open(QIODevice::ReadOnly | QIODevice::Text) ) {
             QStringList menuResult;
             bool getMenu = false;
             while ( !indexFile.atEnd() ) {
                 QString line = QString::fromUtf8( indexFile.readLine() );
-                if ( line == QString::fromUtf8("<div class=\"toctree-wrapper compound\">\n") ) {
+                if ( line == QString::fromUtf8("<div class=\"toctree-wrapper compound\">\n"
+                                               "<ul>\n") ) {
                     getMenu = true;
                 }
                 if (getMenu) {
                     menuResult << line;
                 }
-                if ( line == QString::fromUtf8("</div>\n") ) {
+                if ( line == QString::fromUtf8("</ul>\n"
+                                               "</div>\n") ) {
                     getMenu = false;
                 }
             }
@@ -580,8 +634,7 @@ DocumentationManager::parser(QString html,
                                                "</div>") );
         }
     } else {
-        menuHTML.append( QString::fromUtf8("</ul>"
-                                           "</div>"
+        menuHTML.append( QString::fromUtf8("</div>"
                                            "</div>") );
     }
 
