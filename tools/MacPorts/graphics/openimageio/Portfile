@@ -14,7 +14,7 @@ PortGroup       compiler_blacklist_versions 1.0
 epoch        	 1
 
 fetch.type              git
-github.setup     OpenImageIO oiio 1.7.10 tags/Release-
+github.setup     OpenImageIO oiio 1.7.11 tags/Release-
 #github.version      ${version}-dist
 #github.tarball_from downloads
 
@@ -90,8 +90,6 @@ patch.pre_args	-p1
 patchfiles \
     oiio-1.5.23-checkmaxmem.patch \
     oiio-1.5.23-invalidatespec.patch \
-    oiio-1.6.18-fix_read_tiles_prefix_bytes.patch \
-    oiio-1.7.10-noexifdebug.patch \
     oiio-1.7.10-c99math.patch \
     oiio-1.7.10-nothreads.patch
 
@@ -119,7 +117,7 @@ configure.args-append \
 
 default_variants    +opencolorio +openjpeg +qt4 +freetype
 
-variant natron conflicts ffmpeg requires opencolorio openjpeg qt4 freetype description {Natron version} {
+variant natron conflicts ffmpeg requires opencolorio openjpeg qt4 freetype field3d description {Natron version} {
     if {${configure.cxx_stdlib} eq "libstdc++"} {
         # configure with GCC 4.9 for proper GCC intrinsics support
         configure.compiler macports-gcc-4.9
@@ -143,7 +141,7 @@ variant ffmpeg description {Add FFmpeg support.} {
 variant openjpeg description {Add OpenJPEG support.} {
     depends_lib-append  port:openjpeg
     configure.args-delete       -DUSE_OPENJPEG:BOOL=FALSE
-    configure.args-append       -DUSE_OPENJPEG:BOOL=TRUE -DOPENJPEG_INCLUDE_DIR=${prefix}/include/openjpeg-1.5
+    configure.args-append       -DUSE_OPENJPEG:BOOL=TRUE -DOPENJPEG_HOME=${prefix}
 }
 
 variant python26 conflicts python27 description {Add Python 2.6 bindings.} {
@@ -186,8 +184,6 @@ variant freetype description {Use FreeType.} {
     depends_lib-append port:freetype
 }
 
-variant natron require field3d description {Compile a version to be included in Natron} {
-}
 #configure.args   --enable-bsdtar=shared --enable-bsdcpio=shared \
 #                 --without-lzmadec --without-lzma
 #use_autoreconf	yes

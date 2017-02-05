@@ -30,7 +30,7 @@
 #include <cstddef>
 #include <cassert>
 #include <stdexcept>
-#include <cstring> // for std::memcpy
+#include <cstring> // for std::memcpy, strlen
 #include <sstream> // stringstream
 
 #if defined(Q_OS_LINUX)
@@ -254,7 +254,7 @@ char2wchar(char* arg)
      * mbstowcs which does not count the characters that
      * would result from conversion.  Use an upper bound.
      */
-    size_t argsize = strlen(arg);
+    size_t argsize = std::strlen(arg);
 #else
     size_t argsize = mbstowcs(NULL, arg, 0);
 #endif
@@ -289,7 +289,7 @@ char2wchar(char* arg)
     /* Try conversion with mbrtwoc (C99), and escape non-decodable bytes. */
     /* Overallocate; as multi-byte characters are in the argument, the
      actual output could use less memory. */
-    argsize = strlen(arg) + 1;
+    argsize = std::strlen(arg) + 1;
     res = (wchar_t*)malloc( argsize * sizeof(wchar_t) );
     if (!res) {
         goto oom;
@@ -1694,11 +1694,12 @@ AppManager::getAllNonOFXPluginsPaths() const
 
 
     QString envvar( QString::fromUtf8( qgetenv(NATRON_PATH_ENV_VAR) ) );
-#ifdef __NATRON_WIN32__
-    QStringList splitDirs = envvar.split( QChar::fromLatin1(';') );
-#else
-    QStringList splitDirs = envvar.split( QChar::fromLatin1(':') );
-#endif
+# ifdef __NATRON_WIN32__
+    const QChar pathSep = QChar::fromLatin1(';');
+# else
+    const QChar pathSep = QChar::fromLatin1(':');
+# endif
+    QStringList splitDirs = envvar.split(pathSep);
     std::list<std::string> userSearchPaths;
     _imp->_settings->getPythonGroupsSearchPaths(&userSearchPaths);
 
@@ -3013,9 +3014,9 @@ AppManager::initPython()
 #     endif
     } else {
 #     ifdef __NATRON_WIN32__
-        QChar pathSep = QChar::fromLatin1(';');
+        const QChar pathSep = QChar::fromLatin1(';');
 #     else
-        QChar pathSep = QChar::fromLatin1(':');
+        const QChar pathSep = QChar::fromLatin1(':');
 #     endif
         QString toPrependStr = toPrepend.join(pathSep);
         if (pythonPath.isEmpty()) {

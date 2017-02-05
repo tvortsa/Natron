@@ -469,6 +469,7 @@ ReadNodePrivate::destroyReadNode()
     }
     //This will remove the GUI of non generic parameters
     _publicInterface->recreateKnobs(true);
+#pragma message WARN("TODO: if Gui, refresh pluginID, version, help tooltip in DockablePanel to reflect embedded node change")
 
     QMutexLocker k(&embeddedPluginMutex);
     embeddedPlugin->destroyNode(true, false);
@@ -708,6 +709,7 @@ ReadNodePrivate::createReadNode(bool throwErrors,
 
     //This will refresh the GUI with this Reader specific parameters
     _publicInterface->recreateKnobs(true);
+#pragma message WARN("TODO: if Gui, refresh pluginID, version, help tooltip in DockablePanel to reflect embedded node change")
 
     KnobIPtr knob = node ? node->getKnobByName(kOfxImageEffectFileParamName) : _publicInterface->getKnobByName(kOfxImageEffectFileParamName);
     if (knob) {
@@ -1133,14 +1135,16 @@ ReadNode::knobChanged(const KnobIPtr& k,
                 showMetasKnob->trigger();
             }
         } else {
-            QString ffprobePath = ReadNodePrivate::getFFProbeBinaryPath();
-            if ( isVideoReader( p->getPluginID() ) && QFile::exists(ffprobePath) ) {
+            if ( isVideoReader( p->getPluginID() ) ) {
+                QString ffprobePath = ReadNodePrivate::getFFProbeBinaryPath();
+                assert( QFile::exists(ffprobePath) );
                 QProcess proc;
                 QStringList ffprobeArgs;
                 ffprobeArgs << QString::fromUtf8("-show_streams");
                 KnobFilePtr fileKnob = _imp->inputFileKnob.lock();
                 assert(fileKnob);
                 std::string filename = fileKnob->getValue();
+                getApp()->getProject()->canonicalizePath(filename); // substitute project variables
                 ffprobeArgs << QString::fromUtf8( filename.c_str() );
                 proc.start(ffprobePath, ffprobeArgs);
                 proc.waitForFinished();

@@ -108,8 +108,8 @@ BaseTest::SetUp()
         g_manager = new AppManager;
         int argc = 0;
         QStringList args;
-        args << "--clear-cache";
-        CLArgs cl(args);
+        args << QString::fromUtf8("--clear-cache");
+        CLArgs cl(args, true);
         g_manager->load(argc, 0, cl);
     }
 

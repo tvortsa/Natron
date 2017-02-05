@@ -1096,6 +1096,33 @@ Node::getPluginDescription() const
     if (!plugin) {
         return std::string();
     }
+
+    // if this is a Read or Write plugin, return the description from the embedded plugin
+    std::string pluginID = getPluginID();
+    if (pluginID == PLUGINID_NATRON_READ ||
+        pluginID == PLUGINID_NATRON_WRITE) {
+        EffectInstancePtr effectInstance = getEffectInstance();
+        if ( effectInstance && effectInstance->isReader() ) {
+            ReadNode* isReadNode = dynamic_cast<ReadNode*>( effectInstance.get() );
+
+            if (isReadNode) {
+                NodePtr subnode = isReadNode->getEmbeddedReader();
+                if (subnode) {
+                    return subnode->getPluginDescription();
+                }
+            }
+        } else if ( effectInstance && effectInstance->isWriter() ) {
+            WriteNode* isWriteNode = dynamic_cast<WriteNode*>( effectInstance.get() );
+
+            if (isWriteNode) {
+                NodePtr subnode = isWriteNode->getEmbeddedWriter();
+                if (subnode) {
+                    return subnode->getPluginDescription();
+                }
+            }
+        }
+    }
+
     return plugin->getProperty<std::string>(kNatronPluginPropDescription);
 }
 
@@ -1223,6 +1250,11 @@ Node::setPersistentMessage(MessageTypeEnum type,
 bool
 Node::hasPersistentMessage() const
 {
+    NodePtr ioContainer = getIOContainer();
+    if (ioContainer) {
+        return ioContainer->hasPersistentMessage();
+    }
+
     QMutexLocker k(&_imp->persistentMessageMutex);
 
     return !_imp->persistentMessage.isEmpty();
@@ -1233,6 +1265,11 @@ Node::getPersistentMessage(QString* message,
                            int* type,
                            bool prefixLabelAndType) const
 {
+    NodePtr ioContainer = getIOContainer();
+    if (ioContainer) {
+        return ioContainer->getPersistentMessage(message, type, prefixLabelAndType);
+    }
+
     QMutexLocker k(&_imp->persistentMessageMutex);
 
     *type = _imp->persistentMessageType;
@@ -1270,6 +1307,13 @@ Node::clearPersistentMessageRecursive(std::list<NodePtr>& markedNodes)
 void
 Node::clearPersistentMessageInternal()
 {
+    NodePtr ioContainer = getIOContainer();
+    if (ioContainer) {
+        ioContainer->clearPersistentMessageInternal();
+
+        return;
+    }
+
     bool changed;
     {
         QMutexLocker k(&_imp->persistentMessageMutex);

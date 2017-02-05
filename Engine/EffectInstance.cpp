@@ -340,7 +340,8 @@ EffectInstance::shouldCacheOutput(bool isFrameVaryingOrAnimated,
 
     NodePtr node = getNode();
 
-    std::list<NodeWPtr> outputs = node->getOutputs();
+    std::list<NodeWPtr> outputs;
+    node->getOutputs_mt_safe(outputs);
     std::size_t nOutputNodes = outputs.size();
 
     if (nOutputNodes == 0) {
@@ -1111,30 +1112,39 @@ bool
 EffectInstance::message(MessageTypeEnum type,
                         const std::string & content) const
 {
-    return getNode()->message(type, content);
+    NodePtr node = getNode();
+    assert(node);
+    return node ? node->message(type, content) : false;
 }
 
 void
 EffectInstance::setPersistentMessage(MessageTypeEnum type,
                                      const std::string & content)
 {
-    getNode()->setPersistentMessage(type, content);
+    NodePtr node = getNode();
+    assert(node);
+    if (node) {
+        node->setPersistentMessage(type, content);
+    }
 }
 
 bool
 EffectInstance::hasPersistentMessage()
 {
-    return getNode()->hasPersistentMessage();
+    NodePtr node = getNode();
+    assert(node);
+    return node ? node->hasPersistentMessage() : false;
 }
 
 void
 EffectInstance::clearPersistentMessage(bool recurse)
 {
     NodePtr node = getNode();
-
+    assert(node);
     if (node) {
         node->clearPersistentMessage(recurse);
     }
+    assert( !hasPersistentMessage() );
 }
 
 int

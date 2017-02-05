@@ -164,7 +164,7 @@ public:
 
 
 GenericSchedulerThread::ThreadStateEnum
-TrackScheduler::threadLoopOnce(const ThreadStartArgsPtr& inArgs)
+TrackScheduler::threadLoopOnce(const GenericThreadStartArgsPtr& inArgs)
 {
     boost::shared_ptr<TrackArgs> args = boost::dynamic_pointer_cast<TrackArgs>(inArgs);
 

@@ -27,7 +27,7 @@
 
 #include <cassert>
 #include <algorithm> // min, max
-#include <cstring> // for std::memcpy, std::memset, std::strcmp, std::strchr
+#include <cstring> // for std::memcpy, std::memset, std::strcmp, std::strchr, strlen
 #include <stdexcept>
 
 #include <QThread>
@@ -956,7 +956,7 @@ ViewerGL::isExtensionSupported(const char *extension)
         if (!where) {
             break;
         }
-        terminator = where + strlen(extension);
+        terminator = where + std::strlen(extension);
         if ( (where == start) || (*(where - 1) == ' ') ) {
             if ( (*terminator == ' ') || (*terminator == '\0') ) {
                 return 1;
@@ -3261,20 +3261,15 @@ getColorAtRectForDepth(const Image::CPUTileData& image,
 {
     switch (image.nComps) {
         case 1:
-            getColorAtRectForSrcNComps<PIX, maxValue, 1>(image, roi, forceLinear, srcColorSpace, dstColorSpace, pixelSums);
-            break;
+            return getColorAtRectForSrcNComps<PIX, maxValue, 1>(image, roi, forceLinear, srcColorSpace, dstColorSpace, pixelSums);
         case 2:
-            getColorAtRectForSrcNComps<PIX, maxValue, 2>(image, roi, forceLinear, srcColorSpace, dstColorSpace, pixelSums);
-            break;
+            return getColorAtRectForSrcNComps<PIX, maxValue, 2>(image, roi, forceLinear, srcColorSpace, dstColorSpace, pixelSums);
         case 3:
-            getColorAtRectForSrcNComps<PIX, maxValue, 3>(image, roi, forceLinear, srcColorSpace, dstColorSpace, pixelSums);
-            break;
+            return getColorAtRectForSrcNComps<PIX, maxValue, 3>(image, roi, forceLinear, srcColorSpace, dstColorSpace, pixelSums);
         case 4:
-            getColorAtRectForSrcNComps<PIX, maxValue, 4>(image, roi, forceLinear, srcColorSpace, dstColorSpace, pixelSums);
-            break;
+            return getColorAtRectForSrcNComps<PIX, maxValue, 4>(image, roi, forceLinear, srcColorSpace, dstColorSpace, pixelSums);
         default:
             return false;
-            break;
     }
 } // getColorAtRectForDepth
 
