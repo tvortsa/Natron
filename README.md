@@ -2,18 +2,17 @@ Natron [![GPL2 License](http://img.shields.io/:license-gpl2-blue.svg?style=flat-
 ======
 
 
-Natron is a free open-source (GPLv2 license) video compositing
-software, similar in functionality to Adobe After Effects, Nuke by The
-Foundry, or Blackmagic Fusion.
+Natron свободный, с открытыми исходниками (под лицензией GPLv2) видео-композер,
+схожий по функционалу с Adobe After Effects, Nuke от The Foundry, или Blackmagic Fusion.
 
-It is portable and cross-platform (GNU/Linux, OS X, Microsoft Windows).
+Он портирован и кросс-платформен (GNU/Linux, OS X, Microsoft Windows).
 
-The project home page is http://natron.fr
+Страница проекта http://natron.fr
 
-The project source code repository is https://github.com/MrKepzie/Natron
+Реппозиторий исходников: https://github.com/MrKepzie/Natron
 
-Features
---------
+Возможности
+-----------
 
 - 32 bits floating point linear colour processing pipeline.
 - Colorspace management handled by the OpenColorIO library.
@@ -88,8 +87,8 @@ the views at any time with the OneView node.
 - Multi-plane: Natron is able to deal with multi-layered EXR files thanks to OpenImageIO. It is deeply integrated into the workflow and the user can choose
 to work with any layer (or plane) on any node. New custom layers can also be created.
 
-Requirements
-------------
+Требования
+----------
 
 A machine running one of the supported operating systems (GNU/Linux, OS X,
 Microsoft Windows), and a 32-bits x86 or 64-bits x86-64 processor.
@@ -113,7 +112,7 @@ The following graphics cards are supported for hardware-accelerated rendering:
 On Windows and Linux you can enable software rendering. On Linux, enable the environment variable LIBGL_ALWAYS_SOFTWARE=1 before running Natron. On Windows, enable the legacy hardware package in the installer.
 
 
-Installing
+Установка
 ----------
 
 ### Binary distribution ###
